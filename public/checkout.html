@@ -114,7 +114,7 @@
                 <!-- Info Dana -->
                 <div class="pay-info-box" id="danaInfo" style="display:block;">
                     <h4>💙 Transfer Dana ke:</h4>
-                    <div class="pay-number" id="danaNumber">08xxxxxxxxxx</div>
+                    <div class="pay-number" id="danaNumber">082298673652</div>
                     <div class="pay-holder">a.n. Zeno Store</div>
                     <button class="copy-btn" onclick="copyText(document.getElementById('danaNumber').textContent, 'Nomor Dana')">📋 Salin Nomor</button>
                 </div>
@@ -122,7 +122,7 @@
                 <!-- Info GoPay -->
                 <div class="pay-info-box" id="gopayInfo">
                     <h4>💚 Transfer GoPay ke:</h4>
-                    <div class="pay-number" id="gopayNumber">08xxxxxxxxxx</div>
+                    <div class="pay-number" id="gopayNumber">083847569871</div>
                     <div class="pay-holder">a.n. Zeno Store</div>
                     <button class="copy-btn" onclick="copyText(document.getElementById('gopayNumber').textContent, 'Nomor GoPay')">📋 Salin Nomor</button>
                 </div>
@@ -131,13 +131,8 @@
                 <div class="pay-info-box" id="qrisInfo">
                     <div class="qris-box">
                         <h4>📱 Scan QRIS</h4>
-                        <div class="qris-placeholder">
-                            <span class="qr-icon">🔲</span>
-                            <strong style="display:block;color:var(--text);margin-bottom:4px;">QRIS Zeno Store</strong>
-                            <span>Ganti bagian ini dengan gambar QRIS kamu.<br>Upload file QRIS ke folder public/ lalu ubah src di bawah.</span>
-                        </div>
                         <!-- Uncomment baris ini dan ganti dengan path QRIS kamu: -->
-                        <!-- <img src="/qris.png" alt="QRIS Zeno Store" style="max-width:220px;border-radius:12px;"> -->
+                        <img src="/qris.png" alt="QRIS Zeno Store" style="max-width:220px;border-radius:12px;">
                         <div class="qris-note">⚠️ Pastikan nominal transfer sesuai dengan harga produk. QRIS bisa dipakai dari semua e-wallet & mobile banking.</div>
                     </div>
                 </div>
@@ -202,8 +197,8 @@
         ];
 
         // ======= GANTI DENGAN NOMOR KAMU =======
-        const DANA_NUMBER   = '08xxxxxxxxxx'; // Nomor Dana kamu
-        const GOPAY_NUMBER  = '08xxxxxxxxxx'; // Nomor GoPay kamu
+        const DANA_NUMBER   = '082298673652'; // Nomor Dana kamu
+        const GOPAY_NUMBER  = '083847569871'; // Nomor GoPay kamu
         // ========================================
 
         document.getElementById('danaNumber').textContent = DANA_NUMBER;
