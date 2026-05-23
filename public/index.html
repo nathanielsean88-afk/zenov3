@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeno Store — Plugin & Jasa Minecraft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* HERO */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 20px 60px;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid var(--blue);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-bright);
+            margin-bottom: 24px;
+            animation: fadeUp 0.5s ease both;
+        }
+        .hero h1 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(2.4rem, 8vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+        .hero h1 .accent { color: var(--blue-bright); }
+        .hero p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: var(--text2);
+            max-width: 500px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+            animation: fadeUp 0.5s ease 0.2s both;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.5s ease 0.3s both;
+        }
+
+        /* STATS */
+        .stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border2);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+            padding: 24px 40px;
+            border-right: 1px solid var(--border2);
+            flex: 1;
+            min-width: 120px;
+        }
+        .stat:last-child { border-right: none; }
+        .stat-num {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--blue-bright);
+            display: block;
+        }
+        .stat-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+
+        /* PRODUCTS GRID */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+        .product-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59,130,246,0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .product-card:hover {
+            border-color: rgba(59,130,246,0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.1);
+        }
+        .product-card:hover::after { opacity: 1; }
+        .product-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+        .product-name {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .product-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+        .product-price { font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 900; color: var(--blue-bright); }
+        .product-badge-pos { position: absolute; top: 14px; right: 14px; }
+
+        /* FEATURES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        .feature-card {
+            background: var(--dark2);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 22px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .feature-card:hover { border-color: rgba(59,130,246,0.3); }
+        .feature-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+        .feature-title { font-family: 'Exo 2', sans-serif; font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+        .feature-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+        /* CTA */
+        .cta-section {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 70px 20px;
+            background: linear-gradient(180deg, transparent, rgba(59,130,246,0.04), transparent);
+            border-top: 1px solid var(--border2);
+        }
+        .cta-section h2 { font-family: 'Exo 2', sans-serif; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 900; margin-bottom: 12px; }
+        .cta-section p { color: var(--text2); font-size: 0.95rem; margin-bottom: 32px; }
+        .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+        footer {
+            position: relative; z-index: 1;
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid var(--border2);
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+        footer span { color: var(--blue-bright); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-blue"></div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="/" class="nav-logo">ZENO<span>STORE</span></a>
+        <ul class="nav-links">
+            <li><a href="/products">Produk</a></li>
+            <li><a href="#fitur">Layanan</a></li>
+            <li><a href="#kontak">Kontak</a></li>
+        </ul>
+        <div class="nav-buttons" id="navButtons">
+            <a href="/login" class="btn-sm btn-outline-sm">Login</a>
+            <a href="/register" class="btn-sm btn-solid-sm">Daftar</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div>
+            <div class="hero-tag">⚡ Terpercaya & Profesional</div>
+            <h1>ZENO <span class="accent">STORE</span></h1>
+            <p>Plugin Premium, Asset Minecraft, Backup Server, dan Jasa Website. Semua kebutuhan server Minecraft kamu.</p>
+            <div class="hero-buttons">
+                <a href="/products" class="btn btn-primary">Lihat Produk</a>
+                <a href="/register" class="btn btn-secondary">Daftar Gratis</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats">
+        <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Pelanggan</span></div>
+        <div class="stat"><span class="stat-num">50+</span><span class="stat-label">Plugin</span></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Garansi</span></div>
+        <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">Support</span></div>
+    </div>
+
+    <!-- PRODUK -->
+    <div class="section">
+        <div style="text-align:center; margin-bottom:40px;">
+            <div class="section-tag">// Katalog</div>
+            <h2 class="section-title">PRODUK UNGGULAN</h2>
+        </div>
+        <div class="products-grid">
+            <a href="/products" class="product-card">
+                <div class="product-badge-pos"><span class="badge badge-blue">HOT</span></div>
+                <span class="product-icon">🔌</span>
+                <div class="product-name">Plugin Premium</div>
+                <div class="product-desc">Plugin Minecraft premium original. Anti-cheat, Economy, RPG, dan banyak lagi.</div>
+                <div class="product-price">Mulai Rp 15.000</div>
+            </a>
+            <a href="/products" class="product-card">
+                <span class="product-icon">🎨</span>
+                <div class="product-name">Asset & Mode</div>
+                <div class="product-desc">Resource pack, texture, model 3D custom berkualitas tinggi untuk server kamu.</div>
+                <div class="product-price">Mulai Rp 10.000</div>
+            </a>
+            <a href="/products" class="product-card">
+                <div class="product-badge-pos"><span class="badge badge-success">NEW</span></div>
+                <span class="product-icon">💾</span>
+                <div class="product-name">Backup Server</div>
+                <div class="product-desc">Layanan backup data server Minecraft secara aman dan terjadwal.</div>
+                <div class="product-price">Mulai Rp 25.000</div>
+            </a>
+            <a href="/products" class="product-card">
+                <span class="product-icon">🌐</span>
+                <div class="product-name">Jasa Website</div>
+                <div class="product-desc">Jasa pembuatan website profesional untuk server, toko online, dan lainnya.</div>
+                <div class="product-price">Mulai Rp 150.000</div>
+            </a>
+        </div>
+        <div style="text-align:center; margin-top:32px;">
+            <a href="/products" class="btn btn-primary">Lihat Semua Produk →</a>
+        </div>
+    </div>
+
+    <!-- FITUR -->
+    <div class="section" id="fitur" style="padding-top:0;">
+        <div style="text-align:center; margin-bottom:40px;">
+            <div class="section-tag">// Keunggulan</div>
+            <h2 class="section-title">KENAPA ZENO STORE?</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card"><span class="feature-icon">⚡</span><div class="feature-title">Pengiriman Cepat</div><div class="feature-desc">Produk dikirim instan setelah pembayaran dikonfirmasi.</div></div>
+            <div class="feature-card"><span class="feature-icon">🛡️</span><div class="feature-title">100% Original</div><div class="feature-desc">Semua plugin dan asset adalah produk original berlisensi.</div></div>
+            <div class="feature-card"><span class="feature-icon">💬</span><div class="feature-title">Support 24/7</div><div class="feature-desc">Tim support siap membantu kamu kapan saja.</div></div>
+            <div class="feature-card"><span class="feature-icon">🔒</span><div class="feature-title">Transaksi Aman</div><div class="feature-desc">Pembayaran aman. Data kamu selalu terjaga.</div></div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section" id="kontak">
+        <h2>SIAP BERGABUNG?</h2>
+        <p>Daftar sekarang dan dapatkan akses ke semua produk & layanan Zeno Store.</p>
+        <div class="cta-buttons">
+            <a href="/register" class="btn btn-primary">Daftar Gratis</a>
+            <a href="/login" class="btn btn-secondary">Sudah Punya Akun</a>
+        </div>
+    </div>
+
+    <footer><p>© 2024 <span>Zeno Store</span> — All Rights Reserved</p></footer>
+
+    <script>
+        // Cek login status
+        const user = JSON.parse(localStorage.getItem('zenoUser') || 'null');
+        if (user) {
+            document.getElementById('navButtons').innerHTML = `
+                <span class="nav-user">👤 ${user.username}</span>
+                <a href="/dashboard" class="btn-sm btn-solid-sm">Dashboard</a>
+                <button class="btn-sm btn-outline-sm" onclick="logout()">Logout</button>
+            `;
+        }
+        function logout() {
+            localStorage.removeItem('zenoUser');
+            location.reload();
+        }
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("home");</script>
+</body>
+</html>

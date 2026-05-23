@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produk — Zeno Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-hero {
+            position: relative; z-index: 1;
+            padding: 120px 20px 40px;
+            text-align: center;
+        }
+        .page-hero h1 { font-family: 'Exo 2', sans-serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900; margin-bottom: 8px; }
+        .page-hero p { color: var(--text2); font-size: 0.95rem; }
+
+        .filter-bar {
+            position: relative; z-index: 1;
+            display: flex; gap: 10px; justify-content: center;
+            flex-wrap: wrap; padding: 0 20px 32px;
+        }
+        .filter-btn {
+            padding: 8px 20px; border-radius: 20px;
+            font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; border: 1px solid var(--border2);
+            background: transparent; color: var(--muted);
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--blue); color: #fff; border-color: var(--blue);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .product-card {
+            background: var(--card); border: 1px solid var(--border2);
+            border-radius: 12px; overflow: hidden; transition: all 0.3s;
+        }
+        .product-card:hover {
+            border-color: rgba(59,130,246,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+        }
+        .product-img {
+            background: linear-gradient(135deg, var(--dark3), var(--dark2));
+            height: 140px; display: flex; align-items: center;
+            justify-content: center; font-size: 3rem;
+            border-bottom: 1px solid var(--border2);
+            position: relative;
+        }
+        .product-body { padding: 18px; }
+        .product-cat { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--blue-bright); margin-bottom: 6px; }
+        .product-name { font-family: 'Exo 2', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+        .product-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.5; margin-bottom: 14px; }
+        .product-footer { display: flex; align-items: center; justify-content: space-between; }
+        .product-price { font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 900; color: var(--blue-bright); }
+        .btn-buy {
+            padding: 8px 18px; background: var(--blue); color: #fff;
+            border: none; border-radius: 6px; font-family: 'Sora', sans-serif;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-buy:hover { background: var(--blue-dim); transform: scale(1.02); }
+        .badge-pos { position: absolute; top: 10px; right: 10px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+        .empty-state .big { font-size: 3rem; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="glow-blue"></div>
+
+    <nav>
+        <a href="/" class="nav-logo">ZENO<span>STORE</span></a>
+        <ul class="nav-links">
+            <li><a href="/products" style="color:var(--blue-bright)">Produk</a></li>
+            <li><a href="/#fitur">Layanan</a></li>
+        </ul>
+        <div class="nav-buttons" id="navButtons">
+            <a href="/login" class="btn-sm btn-outline-sm">Login</a>
+            <a href="/register" class="btn-sm btn-solid-sm">Daftar</a>
+        </div>
+    </nav>
+
+    <div class="page-hero">
+        <div class="section-tag">// Katalog</div>
+        <h1>SEMUA PRODUK</h1>
+        <p>Plugin, Asset, Backup, dan Jasa Website untuk server Minecraft kamu</p>
+    </div>
+
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filter('all', this)">Semua</button>
+        <button class="filter-btn" onclick="filter('plugin', this)">Plugin</button>
+        <button class="filter-btn" onclick="filter('asset', this)">Asset</button>
+        <button class="filter-btn" onclick="filter('backup', this)">Backup</button>
+        <button class="filter-btn" onclick="filter('jasa', this)">Jasa</button>
+    </div>
+
+    <div class="section" style="padding-top:0;">
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <footer style="position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid var(--border2);color:var(--muted);font-size:0.82rem;">
+        © 2024 <span style="color:var(--blue-bright)">Zeno Store</span> — All Rights Reserved
+    </footer>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('zenoUser') || 'null');
+        if (user) {
+            document.getElementById('navButtons').innerHTML = `
+                <span class="nav-user">👤 ${user.username}</span>
+                <a href="/dashboard" class="btn-sm btn-solid-sm">Dashboard</a>
+                <button class="btn-sm btn-outline-sm" onclick="logout()">Logout</button>`;
+        }
+        function logout() { localStorage.removeItem('zenoUser'); location.href='/'; }
+
+        const products = [
+            { id:1, cat:'plugin', icon:'🔌', name:'EssentialsX Premium', desc:'Plugin ekonomi & utilitas lengkap untuk server Minecraft kamu.', price:'Rp 20.000', badge:'HOT', badgeType:'badge-blue' },
+            { id:2, cat:'plugin', icon:'⚔️', name:'Anti-Cheat Pro', desc:'Sistem anti-cheat canggih untuk melindungi server dari cheater.', price:'Rp 35.000', badge:'', badgeType:'' },
+            { id:3, cat:'plugin', icon:'🏰', name:'Factions Ultimate', desc:'Plugin factions lengkap dengan fitur war, territory, dan economy.', price:'Rp 45.000', badge:'NEW', badgeType:'badge-success' },
+            { id:4, cat:'plugin', icon:'💰', name:'Economy Plus', desc:'Sistem ekonomi server dengan fitur bank, pajak, dan market.', price:'Rp 25.000', badge:'', badgeType:'' },
+            { id:5, cat:'asset', icon:'🎨', name:'Resource Pack Premium', desc:'Pack texture HD 128x128 dengan visual yang menakjubkan.', price:'Rp 15.000', badge:'', badgeType:'' },
+            { id:6, cat:'asset', icon:'🗺️', name:'Custom Map Lobby', desc:'Map lobby server Minecraft custom dengan desain profesional.', price:'Rp 30.000', badge:'HOT', badgeType:'badge-blue' },
+            { id:7, cat:'asset', icon:'⚡', name:'Particle Effect Pack', desc:'Kumpulan efek partikel custom untuk server kamu.', price:'Rp 12.000', badge:'', badgeType:'' },
+            { id:8, cat:'backup', icon:'💾', name:'Backup Harian', desc:'Backup otomatis server setiap hari, disimpan 7 hari terakhir.', price:'Rp 25.000/bln', badge:'', badgeType:'' },
+            { id:9, cat:'backup', icon:'🔄', name:'Backup Realtime', desc:'Backup realtime setiap 6 jam dengan restore instan.', price:'Rp 50.000/bln', badge:'PRO', badgeType:'badge-blue' },
+            { id:10, cat:'jasa', icon:'🌐', name:'Website Landing Page', desc:'Pembuatan website landing page profesional untuk server kamu.', price:'Rp 150.000', badge:'', badgeType:'' },
+            { id:11, cat:'jasa', icon:'🛒', name:'Website Toko Online', desc:'Website toko online lengkap dengan sistem pembayaran.', price:'Rp 300.000', badge:'', badgeType:'' },
+            { id:12, cat:'jasa', icon:'🤖', name:'Bot Discord', desc:'Bot Discord custom untuk server Minecraft kamu.', price:'Rp 100.000', badge:'NEW', badgeType:'badge-success' },
+        ];
+
+        let currentFilter = 'all';
+
+        function renderProducts(cat) {
+            const grid = document.getElementById('productsGrid');
+            const filtered = cat === 'all' ? products : products.filter(p => p.cat === cat);
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big">📦</div><p>Tidak ada produk</p></div>`;
+                return;
+            }
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card" data-cat="${p.cat}">
+                    <div class="product-img">
+                        ${p.icon}
+                        ${p.badge ? `<div class="badge-pos"><span class="badge ${p.badgeType}">${p.badge}</span></div>` : ''}
+                    </div>
+                    <div class="product-body">
+                        <div class="product-cat">${getCatLabel(p.cat)}</div>
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-desc">${p.desc}</div>
+                        <div class="product-footer">
+                            <div class="product-price">${p.price}</div>
+                            <a href="/checkout?id=${p.id}" class="btn-buy" onclick="return checkLogin(event, ${p.id})">Beli</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filter(cat, btn) {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts(cat);
+        }
+
+        function getCatLabel(cat) {
+            const map = { plugin:'Plugin', asset:'Asset & Mode', backup:'Backup', jasa:'Jasa' };
+            return map[cat] || cat;
+        }
+
+        function checkLogin(e, id) {
+            if (!user) {
+                e.preventDefault();
+                if (confirm('Kamu harus login dulu. Mau login sekarang?')) window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        renderProducts('all');
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("products");</script>
+</body>
+</html>

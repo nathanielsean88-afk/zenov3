@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar — Zeno Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 600; margin-bottom: 24px; transition: color 0.2s; }
+        .back-link:hover { color: var(--blue-bright); }
+        .card-logo { font-family: 'Exo 2', sans-serif; font-size: 1.2rem; font-weight: 900; color: var(--blue-bright); letter-spacing: 2px; margin-bottom: 4px; }
+        .card-logo span { color: var(--text); }
+        .card-title { font-family: 'Exo 2', sans-serif; font-size: 1.6rem; font-weight: 900; margin-bottom: 4px; }
+        .card-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 28px; }
+        .hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+        .hint.err { color: var(--error); }
+        .strength-bar { height: 3px; background: var(--border2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .strength-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0; }
+        input.valid { border-color: var(--success); }
+        input.invalid { border-color: var(--error); }
+        .divider { display: flex; align-items: center; gap: 10px; margin: 20px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+        .divider span { font-size: 0.75rem; color: var(--muted); }
+        .bottom-link { text-align: center; font-size: 0.88rem; color: var(--muted); }
+        .bottom-link a { color: var(--blue-bright); text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="glow-blue"></div>
+    <div class="container">
+        <a href="/" class="back-link">← Kembali</a>
+        <div class="card card-top-line">
+            <div class="card-logo">ZENO<span>STORE</span></div>
+            <h1 class="card-title">DAFTAR</h1>
+            <p class="card-sub">Buat akun gratis sekarang</p>
+
+            <div class="alert alert-error" id="alertError"></div>
+            <div class="alert alert-success" id="alertSuccess"></div>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="username kamu" oninput="checkUsername()">
+                <div class="hint" id="hUser">Minimal 3 karakter</div>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="email@kamu.com" oninput="checkEmail()">
+                <div class="hint" id="hEmail"></div>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" oninput="checkPass()">
+                <div class="strength-bar"><div class="strength-fill" id="sFill"></div></div>
+                <div class="hint" id="hPass">Minimal 6 karakter</div>
+            </div>
+            <div class="form-group">
+                <label>Konfirmasi Password</label>
+                <input type="password" id="confirmPass" placeholder="••••••••" oninput="checkConfirm()">
+                <div class="hint" id="hConfirm"></div>
+            </div>
+
+            <button class="btn btn-primary btn-full" id="btnReg" onclick="handleRegister()">DAFTAR SEKARANG</button>
+            <div class="divider"><span>atau</span></div>
+            <div class="bottom-link">Sudah punya akun? <a href="/login">Login di sini</a></div>
+        </div>
+    </div>
+    <script>
+        function checkUsername() {
+            const v = document.getElementById('username').value.trim();
+            const inp = document.getElementById('username');
+            const h = document.getElementById('hUser');
+            if (v.length >= 3) { inp.className = 'valid'; h.textContent = '✓ OK'; h.className = 'hint'; }
+            else { inp.className = ''; h.textContent = 'Minimal 3 karakter'; h.className = 'hint'; }
+        }
+        function checkEmail() {
+            const v = document.getElementById('email').value.trim();
+            const inp = document.getElementById('email');
+            const h = document.getElementById('hEmail');
+            const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            if (ok) { inp.className = 'valid'; h.textContent = '✓ Email valid'; h.className = 'hint'; }
+            else if (v) { inp.className = 'invalid'; h.textContent = 'Format tidak valid'; h.className = 'hint err'; }
+            else { inp.className = ''; h.textContent = ''; }
+        }
+        function checkPass() {
+            const v = document.getElementById('password').value;
+            const fill = document.getElementById('sFill');
+            const h = document.getElementById('hPass');
+            let s = 0;
+            if (v.length >= 6) s++;
+            if (v.length >= 10) s++;
+            if (/[A-Z]/.test(v)) s++;
+            if (/[0-9]/.test(v)) s++;
+            if (/[^A-Za-z0-9]/.test(v)) s++;
+            const colors = ['#ef4444','#f59e0b','#f59e0b','#22c55e','#3b82f6'];
+            const labels = ['','Lemah','Cukup','Bagus','Kuat','Sangat Kuat'];
+            fill.style.width = (s * 20) + '%';
+            fill.style.background = colors[Math.max(0, s-1)];
+            h.textContent = s > 0 ? 'Kekuatan: ' + labels[s] : 'Minimal 6 karakter';
+            checkConfirm();
+        }
+        function checkConfirm() {
+            const p = document.getElementById('password').value;
+            const c = document.getElementById('confirmPass').value;
+            const inp = document.getElementById('confirmPass');
+            const h = document.getElementById('hConfirm');
+            if (!c) return;
+            if (p === c) { inp.className = 'valid'; h.textContent = '✓ Password cocok'; h.className = 'hint'; }
+            else { inp.className = 'invalid'; h.textContent = 'Password tidak cocok'; h.className = 'hint err'; }
+        }
+        async function handleRegister() {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPass').value;
+            const btn = document.getElementById('btnReg');
+            hide('alertError'); hide('alertSuccess');
+            if (!username || !email || !password || !confirm) return showAlert('alertError', 'Semua field harus diisi!');
+            if (username.length < 3) return showAlert('alertError', 'Username minimal 3 karakter!');
+            if (password.length < 6) return showAlert('alertError', 'Password minimal 6 karakter!');
+            if (password !== confirm) return showAlert('alertError', 'Password tidak cocok!');
+            btn.disabled = true; btn.textContent = 'MEMPROSES...';
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('alertSuccess', data.message);
+                    setTimeout(() => window.location.href = '/login', 1500);
+                } else {
+                    showAlert('alertError', data.message);
+                    btn.disabled = false; btn.textContent = 'DAFTAR SEKARANG';
+                }
+            } catch {
+                showAlert('alertError', 'Terjadi kesalahan. Coba lagi.');
+                btn.disabled = false; btn.textContent = 'DAFTAR SEKARANG';
+            }
+        }
+        function showAlert(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+        function hide(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("register");</script>
+</body>
+</html>

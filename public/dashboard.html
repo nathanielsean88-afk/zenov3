@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Zeno Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrap { position:relative; z-index:1; padding:100px 20px 60px; max-width:900px; margin:0 auto; }
+        .welcome-card {
+            background: linear-gradient(135deg, var(--card), var(--dark2));
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 28px;
+            margin-bottom: 24px; position: relative; overflow: hidden;
+        }
+        .welcome-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--blue-bright), var(--blue));
+        }
+        .welcome-glow {
+            position: absolute; top: -40px; right: -40px;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%);
+            pointer-events: none;
+        }
+        .welcome-tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-bright); margin-bottom: 6px; }
+        .welcome-name { font-family: 'Exo 2', sans-serif; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; margin-bottom: 4px; }
+        .welcome-sub { color: var(--text2); font-size: 0.88rem; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border2); border-radius: 12px; padding: 18px; text-align: center; }
+        .stat-card .num { font-family: 'Exo 2', sans-serif; font-size: 1.8rem; font-weight: 900; color: var(--blue-bright); }
+        .stat-card .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 4px; }
+
+        .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .section-head h2 { font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 800; }
+
+        .order-list { display: flex; flex-direction: column; gap: 12px; }
+        .order-item {
+            background: var(--card); border: 1px solid var(--border2);
+            border-radius: 12px; padding: 16px;
+            display: flex; align-items: center; gap: 14px;
+            transition: border-color 0.2s;
+        }
+        .order-item:hover { border-color: rgba(59,130,246,0.3); }
+        .order-icon { font-size: 1.8rem; flex-shrink: 0; }
+        .order-info { flex: 1; min-width: 0; }
+        .order-name { font-weight: 700; font-size: 0.92rem; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-meta { font-size: 0.78rem; color: var(--muted); }
+        .order-right { text-align: right; flex-shrink: 0; }
+        .order-price { font-family: 'Exo 2', sans-serif; font-weight: 800; color: var(--blue-bright); font-size: 0.92rem; }
+        .order-id { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+        .empty-box { text-align: center; padding: 40px 20px; color: var(--muted); background: var(--card); border: 1px dashed var(--border2); border-radius: 12px; }
+        .empty-box .big { font-size: 2.5rem; margin-bottom: 10px; }
+        .empty-box p { font-size: 0.88rem; margin-bottom: 16px; }
+
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .quick-btn {
+            background: var(--card); border: 1px solid var(--border2);
+            border-radius: 12px; padding: 18px; text-align: center;
+            cursor: pointer; transition: all 0.2s; text-decoration: none;
+            display: block; color: inherit;
+        }
+        .quick-btn:hover { border-color: var(--blue); transform: translateY(-2px); }
+        .quick-btn .q-icon { font-size: 1.6rem; margin-bottom: 8px; display: block; }
+        .quick-btn .q-label { font-size: 0.8rem; font-weight: 700; color: var(--text2); }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .dot-pending { background: var(--warning); }
+        .dot-confirming { background: var(--blue-bright); }
+        .dot-paid { background: var(--success); }
+        .dot-cancelled { background: var(--error); }
+    </style>
+</head>
+<body>
+    <div class="glow-blue"></div>
+    <nav>
+        <a href="/" class="nav-logo">ZENO<span>STORE</span></a>
+        <ul class="nav-links">
+            <li><a href="/products">Produk</a></li>
+            <li><a href="/orders">Pesanan</a></li>
+        </ul>
+        <div class="nav-buttons" id="navButtons"></div>
+    </nav>
+
+    <div class="page-wrap">
+        <!-- Welcome -->
+        <div class="welcome-card">
+            <div class="welcome-glow"></div>
+            <div class="welcome-tag">// Dashboard</div>
+            <div class="welcome-name">Halo, <span id="welcomeName" style="color:var(--blue-bright)">User</span>! 👋</div>
+            <div class="welcome-sub">Selamat datang di Zeno Store</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card"><div class="num" id="totalOrders">0</div><div class="lbl">Total Pesanan</div></div>
+            <div class="stat-card"><div class="num" id="paidOrders">0</div><div class="lbl">Selesai</div></div>
+            <div class="stat-card"><div class="num" id="pendingOrders">0</div><div class="lbl">Menunggu</div></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-head"><h2>⚡ Aksi Cepat</h2></div>
+        <div class="quick-actions">
+            <a href="/products" class="quick-btn"><span class="q-icon">🛒</span><div class="q-label">Beli Produk</div></a>
+            <a href="/orders" class="quick-btn"><span class="q-icon">📦</span><div class="q-label">Pesanan Saya</div></a>
+            <a href="https://wa.me/62xxxxxxxxxx" target="_blank" class="quick-btn"><span class="q-icon">💬</span><div class="q-label">Hubungi Admin</div></a>
+            <a href="/" class="quick-btn"><span class="q-icon">🏠</span><div class="q-label">Beranda</div></a>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="section-head">
+            <h2>📋 Pesanan Terbaru</h2>
+            <a href="/orders" style="color:var(--blue-bright);font-size:0.82rem;text-decoration:none;font-weight:700;">Lihat Semua →</a>
+        </div>
+        <div class="order-list" id="orderList">
+            <div class="empty-box">
+                <div class="big">📭</div>
+                <p>Belum ada pesanan</p>
+                <a href="/products" class="btn btn-primary">Belanja Sekarang</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('zenoUser') || 'null');
+        if (!user) { window.location.href = '/login'; }
+
+        document.getElementById('welcomeName').textContent = user.username;
+        document.getElementById('navButtons').innerHTML = `
+            <span class="nav-user">👤 ${user.username}</span>
+            <button class="btn-sm btn-outline-sm" onclick="logout()">Logout</button>`;
+
+        function logout() { localStorage.removeItem('zenoUser'); location.href='/'; }
+
+        function getStatusBadge(status) {
+            const map = {
+                pending: ['badge-warning','⏳ Menunggu Bukti', 'dot-pending'],
+                confirming: ['badge-blue','🔍 Dikonfirmasi', 'dot-confirming'],
+                paid: ['badge-success','✅ Selesai', 'dot-paid'],
+                cancelled: ['badge-error','❌ Dibatalkan', 'dot-cancelled']
+            };
+            return map[status] || map['pending'];
+        }
+
+        function getCatIcon(name) {
+            if (name.toLowerCase().includes('plugin') || name.toLowerCase().includes('cheat') || name.toLowerCase().includes('faction') || name.toLowerCase().includes('economy') || name.toLowerCase().includes('essential')) return '🔌';
+            if (name.toLowerCase().includes('resource') || name.toLowerCase().includes('map') || name.toLowerCase().includes('particle')) return '🎨';
+            if (name.toLowerCase().includes('backup')) return '💾';
+            if (name.toLowerCase().includes('website') || name.toLowerCase().includes('bot')) return '🌐';
+            return '📦';
+        }
+
+        async function loadOrders() {
+            try {
+                const res = await fetch('/api/orders/' + user.userId);
+                const data = await res.json();
+                const orders = data.orders || [];
+
+                document.getElementById('totalOrders').textContent = orders.length;
+                document.getElementById('paidOrders').textContent = orders.filter(o => o.status === 'paid').length;
+                document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'pending' || o.status === 'confirming').length;
+
+                const recent = orders.slice(-5).reverse();
+                const list = document.getElementById('orderList');
+
+                if (orders.length === 0) {
+                    list.innerHTML = `<div class="empty-box"><div class="big">📭</div><p>Belum ada pesanan</p><a href="/products" class="btn btn-primary">Belanja Sekarang</a></div>`;
+                    return;
+                }
+
+                list.innerHTML = recent.map(o => {
+                    const [badgeClass, badgeLabel] = getStatusBadge(o.status);
+                    const date = new Date(o.createdAt).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+                    return `
+                    <div class="order-item">
+                        <div class="order-icon">${getCatIcon(o.productName)}</div>
+                        <div class="order-info">
+                            <div class="order-name">${o.productName}</div>
+                            <div class="order-meta">${date} · <span class="badge ${badgeClass}">${badgeLabel}</span></div>
+                        </div>
+                        <div class="order-right">
+                            <div class="order-price">${o.price}</div>
+                            <div class="order-id">${o.orderId}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch {
+                document.getElementById('orderList').innerHTML = '<div class="empty-box"><div class="big">⚠️</div><p>Gagal memuat pesanan</p></div>';
+            }
+        }
+
+        loadOrders();
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("dashboard");</script>
+</body>
+</html>

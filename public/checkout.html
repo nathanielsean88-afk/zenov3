@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — Zeno Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrap { position:relative; z-index:1; padding:100px 20px 60px; max-width:700px; margin:0 auto; }
+        .page-title { font-family:'Exo 2',sans-serif; font-size:1.8rem; font-weight:900; margin-bottom:24px; }
+        .order-summary { background:var(--dark3); border:1px solid var(--border2); border-radius:12px; padding:20px; margin-bottom:20px; }
+        .order-summary h3 { font-family:'Exo 2',sans-serif; font-size:1rem; font-weight:800; margin-bottom:14px; color:var(--blue-bright); }
+        .order-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border2); font-size:0.88rem; }
+        .order-row:last-child { border-bottom:none; font-weight:700; font-size:1rem; color:var(--blue-bright); }
+
+        /* Payment methods - 3 columns */
+        .payment-methods { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+        .payment-option {
+            background:var(--dark3); border:2px solid var(--border2);
+            border-radius:12px; padding:14px 10px; text-align:center;
+            cursor:pointer; transition:all 0.25s;
+        }
+        .payment-option:hover { border-color:var(--blue); background:rgba(59,130,246,0.06); }
+        .payment-option.selected { border-color:var(--blue); background:rgba(59,130,246,0.12); box-shadow:0 0 0 1px var(--blue); }
+        .pay-icon { font-size:1.8rem; display:block; margin-bottom:6px; }
+        .pay-name { font-size:0.78rem; font-weight:700; color:var(--text); }
+        .pay-sub { font-size:0.68rem; color:var(--muted); margin-top:2px; }
+
+        /* Payment info box */
+        .pay-info-box {
+            background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.2);
+            border-radius:12px; padding:20px; margin-bottom:20px; display:none;
+        }
+        .pay-info-box h4 { font-family:'Exo 2',sans-serif; font-weight:800; margin-bottom:14px; color:var(--blue-bright); font-size:0.95rem; }
+        .pay-number { font-family:'Exo 2',sans-serif; font-size:1.5rem; font-weight:900; color:var(--text); letter-spacing:2px; margin:8px 0 4px; }
+        .pay-holder { font-size:0.85rem; color:var(--text2); margin-bottom:12px; }
+
+        /* QRIS box */
+        .qris-box { text-align:center; }
+        .qris-placeholder {
+            background:var(--dark3); border:2px dashed var(--border2);
+            border-radius:12px; padding:30px 20px; margin:12px 0;
+            font-size:0.85rem; color:var(--muted);
+        }
+        .qris-placeholder .qr-icon { font-size:3rem; display:block; margin-bottom:8px; }
+        .qris-note { font-size:0.78rem; color:var(--muted); background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:8px; padding:10px; margin-top:10px; }
+
+        .copy-btn { padding:7px 16px; background:var(--blue); color:#fff; border:none; border-radius:6px; font-size:0.78rem; font-weight:700; cursor:pointer; transition:background 0.2s; }
+        .copy-btn:hover { background:var(--blue-dim); }
+
+        .upload-area { border:2px dashed var(--border2); border-radius:10px; padding:24px; text-align:center; cursor:pointer; transition:border-color 0.2s; margin-bottom:16px; }
+        .upload-area:hover { border-color:var(--blue); }
+        .upload-area input { display:none; }
+        .upload-icon { font-size:2rem; margin-bottom:8px; display:block; }
+        .upload-text { font-size:0.85rem; color:var(--muted); }
+        .preview-img { max-width:100%; border-radius:8px; margin-top:10px; display:none; }
+
+        .step { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; }
+        .step-num { width:24px; height:24px; background:var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; color:#fff; flex-shrink:0; margin-top:1px; }
+        .step-text { font-size:0.85rem; color:var(--text2); line-height:1.5; }
+
+        #successMsg { display:none; text-align:center; padding:40px 20px; }
+        #successMsg .big { font-size:3rem; margin-bottom:12px; }
+        #successMsg h2 { font-family:'Exo 2',sans-serif; font-size:1.4rem; font-weight:900; margin-bottom:8px; }
+        #successMsg p { color:var(--text2); font-size:0.88rem; margin-bottom:16px; }
+    </style>
+</head>
+<body>
+    <div class="glow-blue"></div>
+    <nav>
+        <a href="/" class="nav-logo">ZENO<span>STORE</span></a>
+        <ul class="nav-links"><li><a href="/products">Produk</a></li></ul>
+        <div class="nav-buttons" id="navButtons"></div>
+    </nav>
+
+    <div class="page-wrap">
+        <div id="checkoutForm">
+            <div class="section-tag">// Pembelian</div>
+            <h1 class="page-title">CHECKOUT</h1>
+
+            <div class="alert alert-error" id="alertError"></div>
+            <div class="alert alert-success" id="alertSuccess"></div>
+
+            <!-- Ringkasan -->
+            <div class="order-summary">
+                <h3>📦 Ringkasan Pesanan</h3>
+                <div class="order-row"><span>Produk</span><span id="sumProduct">-</span></div>
+                <div class="order-row"><span>Kategori</span><span id="sumCat">-</span></div>
+                <div class="order-row"><span>Total Bayar</span><span id="sumPrice">-</span></div>
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div class="card card-top-line" style="margin-bottom:16px;">
+                <h3 style="font-family:'Exo 2',sans-serif;font-weight:800;margin-bottom:16px;">💳 Pilih Metode Pembayaran</h3>
+                <div class="payment-methods">
+                    <div class="payment-option selected" onclick="selectPayment('dana', this)">
+                        <span class="pay-icon">💙</span>
+                        <div class="pay-name">Dana</div>
+                        <div class="pay-sub">Transfer Dana</div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment('gopay', this)">
+                        <span class="pay-icon">💚</span>
+                        <div class="pay-name">GoPay</div>
+                        <div class="pay-sub">Transfer GoPay</div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment('qris', this)">
+                        <span class="pay-icon">📱</span>
+                        <div class="pay-name">QRIS</div>
+                        <div class="pay-sub">Scan QR Code</div>
+                    </div>
+                </div>
+
+                <!-- Info Dana -->
+                <div class="pay-info-box" id="danaInfo" style="display:block;">
+                    <h4>💙 Transfer Dana ke:</h4>
+                    <div class="pay-number" id="danaNumber">08xxxxxxxxxx</div>
+                    <div class="pay-holder">a.n. Zeno Store</div>
+                    <button class="copy-btn" onclick="copyText(document.getElementById('danaNumber').textContent, 'Nomor Dana')">📋 Salin Nomor</button>
+                </div>
+
+                <!-- Info GoPay -->
+                <div class="pay-info-box" id="gopayInfo">
+                    <h4>💚 Transfer GoPay ke:</h4>
+                    <div class="pay-number" id="gopayNumber">08xxxxxxxxxx</div>
+                    <div class="pay-holder">a.n. Zeno Store</div>
+                    <button class="copy-btn" onclick="copyText(document.getElementById('gopayNumber').textContent, 'Nomor GoPay')">📋 Salin Nomor</button>
+                </div>
+
+                <!-- Info QRIS -->
+                <div class="pay-info-box" id="qrisInfo">
+                    <div class="qris-box">
+                        <h4>📱 Scan QRIS</h4>
+                        <div class="qris-placeholder">
+                            <span class="qr-icon">🔲</span>
+                            <strong style="display:block;color:var(--text);margin-bottom:4px;">QRIS Zeno Store</strong>
+                            <span>Ganti bagian ini dengan gambar QRIS kamu.<br>Upload file QRIS ke folder public/ lalu ubah src di bawah.</span>
+                        </div>
+                        <!-- Uncomment baris ini dan ganti dengan path QRIS kamu: -->
+                        <!-- <img src="/qris.png" alt="QRIS Zeno Store" style="max-width:220px;border-radius:12px;"> -->
+                        <div class="qris-note">⚠️ Pastikan nominal transfer sesuai dengan harga produk. QRIS bisa dipakai dari semua e-wallet & mobile banking.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cara Pembayaran -->
+            <div class="card" style="margin-bottom:16px;">
+                <h3 style="font-family:'Exo 2',sans-serif;font-weight:800;margin-bottom:14px;">📋 Cara Pembayaran</h3>
+                <div class="step"><div class="step-num">1</div><div class="step-text">Pilih metode pembayaran (Dana, GoPay, atau QRIS)</div></div>
+                <div class="step"><div class="step-num">2</div><div class="step-text">Transfer sesuai nominal harga produk</div></div>
+                <div class="step"><div class="step-num">3</div><div class="step-text">Screenshot bukti pembayaran</div></div>
+                <div class="step"><div class="step-num">4</div><div class="step-text">Upload bukti di bawah & klik Kirim Pesanan</div></div>
+                <div class="step"><div class="step-num">5</div><div class="step-text">Tunggu konfirmasi admin (maks 1x24 jam)</div></div>
+            </div>
+
+            <!-- Upload Bukti -->
+            <div class="card card-top-line" style="margin-bottom:16px;">
+                <h3 style="font-family:'Exo 2',sans-serif;font-weight:800;margin-bottom:14px;">📸 Upload Bukti Pembayaran</h3>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*" onchange="previewFile(this)">
+                    <span class="upload-icon">📁</span>
+                    <div class="upload-text" id="uploadText">Klik untuk upload screenshot bukti transfer</div>
+                    <img class="preview-img" id="previewImg" alt="preview">
+                </div>
+                <div class="form-group">
+                    <label>Catatan (opsional)</label>
+                    <textarea id="notes" rows="2" placeholder="Misal: transfer via Dana jam 10 pagi..."></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full" id="btnOrder" onclick="submitOrder()">KIRIM PESANAN</button>
+        </div>
+
+        <!-- Success -->
+        <div id="successMsg">
+            <div class="big">🎉</div>
+            <h2>PESANAN DIKIRIM!</h2>
+            <p>Bukti pembayaran kamu sudah kami terima.</p>
+            <p>Admin akan mengkonfirmasi dalam <strong style="color:var(--blue-bright)">1x24 jam</strong>.</p>
+            <p style="color:var(--blue-bright);font-weight:700;margin-top:8px;" id="orderIdText"></p>
+            <br>
+            <a href="/orders" class="btn btn-primary">Lihat Status Pesanan</a>
+            <br><br>
+            <a href="/products" class="btn btn-secondary">Belanja Lagi</a>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id:1, cat:'Plugin', name:'EssentialsX Premium', price:'Rp 20.000', rawPrice:20000 },
+            { id:2, cat:'Plugin', name:'Anti-Cheat Pro', price:'Rp 35.000', rawPrice:35000 },
+            { id:3, cat:'Plugin', name:'Factions Ultimate', price:'Rp 45.000', rawPrice:45000 },
+            { id:4, cat:'Plugin', name:'Economy Plus', price:'Rp 25.000', rawPrice:25000 },
+            { id:5, cat:'Asset', name:'Resource Pack Premium', price:'Rp 15.000', rawPrice:15000 },
+            { id:6, cat:'Asset', name:'Custom Map Lobby', price:'Rp 30.000', rawPrice:30000 },
+            { id:7, cat:'Asset', name:'Particle Effect Pack', price:'Rp 12.000', rawPrice:12000 },
+            { id:8, cat:'Backup', name:'Backup Harian', price:'Rp 25.000/bln', rawPrice:25000 },
+            { id:9, cat:'Backup', name:'Backup Realtime', price:'Rp 50.000/bln', rawPrice:50000 },
+            { id:10, cat:'Jasa', name:'Website Landing Page', price:'Rp 150.000', rawPrice:150000 },
+            { id:11, cat:'Jasa', name:'Website Toko Online', price:'Rp 300.000', rawPrice:300000 },
+            { id:12, cat:'Jasa', name:'Bot Discord', price:'Rp 100.000', rawPrice:100000 },
+        ];
+
+        // ======= GANTI DENGAN NOMOR KAMU =======
+        const DANA_NUMBER   = '08xxxxxxxxxx'; // Nomor Dana kamu
+        const GOPAY_NUMBER  = '08xxxxxxxxxx'; // Nomor GoPay kamu
+        // ========================================
+
+        document.getElementById('danaNumber').textContent = DANA_NUMBER;
+        document.getElementById('gopayNumber').textContent = GOPAY_NUMBER;
+
+        const user = JSON.parse(localStorage.getItem('zenoUser') || 'null');
+        if (!user) window.location.href = '/login';
+
+        document.getElementById('navButtons').innerHTML = `
+            <span class="nav-user">👤 ${user.username}</span>
+            <a href="/dashboard" class="btn-sm btn-solid-sm">Dashboard</a>
+            <button class="btn-sm btn-outline-sm" onclick="logout()">Logout</button>`;
+
+        const params = new URLSearchParams(window.location.search);
+        const productId = parseInt(params.get('id'));
+        const product = products.find(p => p.id === productId);
+        if (!product) window.location.href = '/products';
+        else {
+            document.getElementById('sumProduct').textContent = product.name;
+            document.getElementById('sumCat').textContent = product.cat;
+            document.getElementById('sumPrice').textContent = product.price;
+        }
+
+        let selectedPayment = 'dana';
+        let buktiBase64 = '';
+
+        function selectPayment(method, el) {
+            selectedPayment = method;
+            document.querySelectorAll('.payment-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('danaInfo').style.display  = method === 'dana'  ? 'block' : 'none';
+            document.getElementById('gopayInfo').style.display = method === 'gopay' ? 'block' : 'none';
+            document.getElementById('qrisInfo').style.display  = method === 'qris'  ? 'block' : 'none';
+        }
+
+        function previewFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                buktiBase64 = e.target.result;
+                document.getElementById('previewImg').src = buktiBase64;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('uploadText').textContent = '✓ ' + file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function copyText(text, label) {
+            navigator.clipboard.writeText(text).then(() => alert(label + ' disalin!'));
+        }
+
+        async function submitOrder() {
+            if (!buktiBase64) return showAlert('alertError', 'Upload bukti pembayaran dulu!');
+            const btn = document.getElementById('btnOrder');
+            btn.disabled = true; btn.textContent = 'MEMPROSES...';
+            try {
+                const orderRes = await fetch('/api/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.userId, username: user.username, email: user.email,
+                        productId: product.id, productName: product.name,
+                        price: product.price, paymentMethod: selectedPayment
+                    })
+                });
+                const orderData = await orderRes.json();
+                if (!orderData.success) throw new Error();
+
+                await fetch('/api/confirm-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: orderData.orderId, buktiUrl: buktiBase64 })
+                });
+
+                document.getElementById('checkoutForm').style.display = 'none';
+                document.getElementById('orderIdText').textContent = 'Order ID: ' + orderData.orderId;
+                document.getElementById('successMsg').style.display = 'block';
+            } catch {
+                showAlert('alertError', 'Terjadi kesalahan. Coba lagi.');
+                btn.disabled = false; btn.textContent = 'KIRIM PESANAN';
+            }
+        }
+
+        function showAlert(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+        function logout() { localStorage.removeItem('zenoUser'); location.href='/'; }
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("checkout");</script>
+</body>
+</html>
